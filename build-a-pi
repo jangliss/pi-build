@@ -183,7 +183,7 @@ false "ARDOPGUI" "GUI for ARDOP" \
 false "HAMLIB" "Needed for Rig Control" \
 false "DIREWOLF" "Software TNC" \
 false "AX25" "Data Link Layer Protocol" \
-false "PULSE" "Sound Server" \
+false "PULSE" "Pulse Audio Control Interface" \
 --button="Exit":1 \
 --button="Check All and Continue":3 \
 --button="Next":2 > $BASE
@@ -200,20 +200,8 @@ echo "$i" >> $BASE
 done
 fi
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 #check if hotspot is chosen for install & get info if needed
 HS=$(grep "HOTSPOT" $BASE)
-=======
-#############################################################
-#check if hotspot is chosen for install & get info if needed#
-#############################################################
-HS=$(cat $BASE | grep HOTSPOT)
->>>>>>> upstream/master
-=======
-#check if hotspot is chosen for install & get info if needed
-HS=$(grep "HOTSPOT" $BASE)
->>>>>>> 9061ac19d13f2692c314d2d42bd41e7156778a33
 if [ -n "$HS" ]; then
 HSINFO(){
 #unblock wifi
@@ -222,8 +210,7 @@ sudo rfkill unblock all > /dev/null 2>&1
 sudo ifconfig wlan0 up
 #LIST=$(sudo iw dev "wlan0" scan ap-force | egrep "^BSS|SSID:" | grep SSID: | sed 's/SSID://' | awk '{ print $1 }')
 #LIST=$(echo $LIST | sed 's/ /|/g')
-LIST=$(sudo iw dev "wlan0" scan ap-force | grep "SSID:" | awk '{print $2}')
-LIST=$(echo "$LIST" | tr '\n' '|')
+LIST=$(sudo iw dev "wlan0" scan ap-force | sed -ne 's/^.*SSID: \(..*\)/\1/p' | sort | uniq | paste -sd '|')
 
 
 HSINFO=$(yad --center --form --width=400 --height=400 --separator="|" --item-separator="|" \
@@ -434,6 +421,8 @@ false "YGATE" "Yaesu APRS Software" \
 false "BPQ" "LinBPQ Software" \
 false "BATT" "Battery Test Script" \
 false "VNC" "VNC Client Application" \
+false "ZYGRIB" "Grib File Viewer" \
+false "GPSUPDATE" "Tool to Manage GPS Devices" \
 --button="Exit":1 \
 --button="Check All and Continue":3 \
 --button="Install Selected":2 > $UTILITY
@@ -443,7 +432,7 @@ exit
 fi
 
 if [ $BUT = 3 ]; then
-UTILAPPS=(DIPOLE CALLSIGN TEMPCONVERT GPARTED SHOWLOG PISTATS TELNET PITERM SECURITY YGATE BPQ BATT VNC)
+UTILAPPS=(DIPOLE CALLSIGN TEMPCONVERT GPARTED SHOWLOG PISTATS TELNET PITERM SECURITY YGATE BPQ BATT VNC ZYGRIB GPSUPDATE)
 for i in "${UTILAPPS[@]}"
 do
 echo "$i" >> $UTILITY
@@ -459,12 +448,11 @@ sudo apt-get -y upgrade
 sudo apt -y full-upgrade
 
 #set wallpaper
-pcmanfm --set-wallpaper $MYPATH/bap-wallpaper.jpg
-<<<<<<< HEAD
-=======
+#fix issue 193
+sudo cp bap-wallpaper.jpg /usr/share/rpd-wallpaper/
+pcmanfm --set-wallpaper /usr/share/rpd-wallpaper/bap-wallpaper.jpg
 
 mkdir -p $DIR 2> /dev/null
->>>>>>> 9061ac19d13f2692c314d2d42bd41e7156778a33
 
 #add virtual sound card link for pulse audio
 cd $DIR
@@ -573,11 +561,7 @@ done < $UTILITY
 #Remove temp files
 rm $BASE $ADDITIONAL $UTILITY $FLSUITE > /dev/null 2>&1
 rm -rf $DIR > /dev/null 2>&1
-<<<<<<< HEAD
-#rm -rf $HOME/Downloads/* > /dev/null 2>&1
-=======
->>>>>>> 9061ac19d13f2692c314d2d42bd41e7156778a33
-sudo apt -y autoremove > /dev/null 2>&1
+#sudo apt -y autoremove > /dev/null 2>&1
 
 #restore crontab
 crontab $TEMPCRON
@@ -600,7 +584,6 @@ sudo reboot
 elif [ $BUT = 1 ]; then
 exit
 fi
-
 
 
 
